@@ -1,6 +1,7 @@
 import math
 
 import arcade
+from arcade import  check_for_collision_with_list
 
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 600
@@ -62,8 +63,56 @@ class Court(arcade.View):
         self.t += 1/30
         self.ball.draw_hit_box(line_thickness=3)
 
+        # check for collisions
+        obstacles_hit = []
+        if self.t > 2:
+            obstacles_hit = check_for_collision_with_list(self.ball, self.obstacles_sprite_list)
+
         self.ball.center_x = self.ball.start_x + (self.ball.vx * self.t)
         self.ball.center_y = max(self.ball.radius + 1, self.ball.start_y + (self.ball.vy * self.t) - (0.5 * self.g * self.t**2))
+
+        if self.basket in obstacles_hit and not self.scored:
+            print("Basket")
+            self.scored = True
+            self.ball.start_x = self.basket.center_x
+            self.ball.start_y = self.ball.center_y
+            self.ball.vx = 0
+            self.ball.vy = 10
+            self.t = 0
+            return
+
+        if self.rim in obstacles_hit:
+            print(f"RIM!")
+            self.ball.start_x = self.ball.center_x
+            self.ball.start_y = self.ball.center_y
+            self.ball.vx *= -0.9
+            if self.ball.center_x >= self.rim.center_x:
+                self.ball.vy = abs(0.9 * ((self.ball.vy - (self.g * self.t)) * 0.75))
+            else:
+                self.ball.vy = -1 * abs(0.9 * ((self.ball.vy - (self.g * self.t)) * 0.75))
+
+            self.t = 0
+
+        if self.backboard in obstacles_hit:
+            print("hit backboard")
+            self.ball.start_x = self.ball.center_x - 1
+            self.ball.start_y = self.ball.center_y
+            self.ball.vx *= -0.5
+            self.ball.vy = self.ball.vy - (self.g * self.t)
+            self.t = 0
+
+        #
+        if self.floor in obstacles_hit:
+            print(f"hit floor {self.ball.vx=} {self.ball.vy=}")
+            self.ball.start_x = self.ball.center_x
+            self.ball.start_y = self.ball.radius
+            self.ball.vx *= 0.9
+            # print (f"{self.ball.vy=} at {self.t=} {self.g=} changing to {abs((self.ball.vy - (self.g * self.t)) * 0.75)}")
+            self.ball.vy = abs((self.ball.vy - (self.g * self.t)) * 0.75)
+            if self.ball.vy < 8.5:
+                self.ball.vy = 0
+                self.shoot = False
+            self.t = 0
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.UP:
