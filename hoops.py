@@ -37,9 +37,7 @@ class Court(arcade.View):
         self.obstacles_sprite_list.append(self.rim)
 
     def on_update(self, delta_time):
-        self.ball.center_x += self.ball.x_velocity
-        if self.ball.center_x < self.ball.width/2 or self.ball.center_x > WINDOW_WIDTH - self.ball.width/2:
-            self.ball.x_velocity *= -1
+        pass
 
 
 
@@ -48,7 +46,6 @@ class Ball(arcade.SpriteCircle):
         super().__init__(radius, color)
         self.center_x = x
         self.center_y = y
-        self.x_velocity = 3
 
 class Backboard(arcade.SpriteSolidColor):
     def __init__(self, width, height, x, y, c):
