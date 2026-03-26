@@ -1,3 +1,5 @@
+import math
+
 import arcade
 
 WINDOW_WIDTH = 600
@@ -16,6 +18,13 @@ class Court(arcade.View):
         self.floor = None
         self.sprite_list = None
         self.obstacles_sprite_list = None
+        self.t = 0
+        self.g = 9.8
+        self.shoot = False
+        self.delta_v = 5
+        self.delta_theta = 2
+        self.max_v = 250
+        self.scored = False
 
     def on_draw(self):
         self.clear()
@@ -43,6 +52,28 @@ class Court(arcade.View):
 
     def on_update(self, delta_time):
         pass
+
+    def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
+        if symbol == arcade.key.UP:
+            self.ball.theta = min(self.ball.theta + self.delta_theta, 89)
+        elif symbol == arcade.key.DOWN:
+            self.ball.theta = max(self.ball.theta - self.delta_theta, 1)
+        if symbol == arcade.key.RIGHT:
+            self.ball.v0 = min(self.ball.v0 + self.delta_v, self.max_v)
+        elif symbol == arcade.key.LEFT:
+            self.ball.v0 = max(self.ball.v0 - self.delta_v, 1)
+        if symbol == arcade.key.SPACE and not self.shoot:
+            self.shoot = True
+            self.ball.vx = self.ball.v0 * math.cos(math.radians(self.ball.theta))
+            self.ball.vy = self.ball.v0 * math.sin(math.radians(self.ball.theta))
+        if symbol == arcade.key.R:
+            self.t = -1
+            self.shoot = True
+            self.ball.center_x = 40
+            self.ball.center_y = 100
+            self.ball.start_x = 40
+            self.ball.start_y = 100
+            self.scored = False
 
 
 class Ball(arcade.SpriteCircle):
