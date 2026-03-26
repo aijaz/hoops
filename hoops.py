@@ -51,7 +51,19 @@ class Court(arcade.View):
         self.obstacles_sprite_list.append(self.rim)
 
     def on_update(self, delta_time):
-        pass
+        if not self.shoot:
+            return
+
+        if self.t < 0:
+            self.t = 0
+            self.shoot = False
+            return
+
+        self.t += 1/30
+        self.ball.draw_hit_box(line_thickness=3)
+
+        self.ball.center_x = self.ball.start_x + (self.ball.vx * self.t)
+        self.ball.center_y = max(self.ball.radius + 1, self.ball.start_y + (self.ball.vy * self.t) - (0.5 * self.g * self.t**2))
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.UP:
