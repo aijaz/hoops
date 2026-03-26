@@ -18,7 +18,7 @@ class Court(arcade.View):
 
     def setup(self):
         self.sprite_list = arcade.SpriteList()
-        self.ball = Ball(20, 20, arcade.color.RED, 40, 100)
+        self.ball = Ball(radius=20, color=arcade.color.DARK_RED, x=40, y=100)
         self.sprite_list.append(self.ball)
 
     def on_update(self, delta_time):
@@ -28,9 +28,11 @@ class Court(arcade.View):
 
 
 
-class Ball(arcade.SpriteSolidColor):
-    def __init__(self, width, height, c, x, y):
-        super().__init__(width, height, x, y, c)
+class Ball(arcade.SpriteCircle):
+    def __init__(self, radius, color, x, y):
+        super().__init__(radius, color)
+        self.center_x = x
+        self.center_y = y
         self.x_velocity = 3
 
 
