@@ -11,15 +11,30 @@ class Court(arcade.View):
         self.background_color = arcade.color.ALMOND
         self.ball = None
         self.sprite_list = None
+        self.backboard = None
+        self.floor = None
+        self.sprite_list = None
+        self.obstacles_sprite_list = None
+
 
     def on_draw(self):
         self.clear()
         self.sprite_list.draw()
+        self.obstacles_sprite_list.draw()
 
     def setup(self):
         self.sprite_list = arcade.SpriteList()
         self.ball = Ball(radius=20, color=arcade.color.DARK_RED, x=40, y=100)
         self.sprite_list.append(self.ball)
+        self.backboard = Backboard(20, 200, WINDOW_WIDTH - 20, 400, arcade.color.WHITE)
+        self.floor = Floor()
+        self.basket = Basket(80, 4, WINDOW_WIDTH - 30 - (80/2), 380, arcade.color.RED)
+        self.rim = Rim(4, 4, WINDOW_WIDTH - 30 - 80 - 2, 380, arcade.color.BLACK)
+        self.obstacles_sprite_list = arcade.SpriteList()
+        self.obstacles_sprite_list.append(self.floor)
+        self.obstacles_sprite_list.append(self.backboard)
+        self.obstacles_sprite_list.append(self.basket)
+        self.obstacles_sprite_list.append(self.rim)
 
     def on_update(self, delta_time):
         self.ball.center_x += self.ball.x_velocity
@@ -34,6 +49,24 @@ class Ball(arcade.SpriteCircle):
         self.center_x = x
         self.center_y = y
         self.x_velocity = 3
+
+class Backboard(arcade.SpriteSolidColor):
+    def __init__(self, width, height, x, y, c):
+        super().__init__(width, height, x, y, c)
+
+
+class Floor(arcade.SpriteSolidColor):
+    def __init__(self):
+        # super().__init__(width=200, height=4, x=20, y=4, c=arcade.color.BLACK)
+        super().__init__(WINDOW_WIDTH, 2, WINDOW_WIDTH/2, 1, arcade.color.RED)
+
+class Basket(arcade.SpriteSolidColor):
+    def __init__(self, width, height, x, y, c):
+        super().__init__(width, height, x, y, c)
+
+class Rim(arcade.SpriteSolidColor):
+    def __init__(self, width, height, x, y, c):
+        super().__init__(width, height, x, y, c)
 
 
 
