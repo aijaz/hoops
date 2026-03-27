@@ -52,19 +52,13 @@ main()
 ```
 # 2 Make the ball circular
 Change
-
-```python
-    def setup(self):
-        self.sprite_list = arcade.SpriteList()
-        self.ball = Ball(20, 20, arcade.color.RED, 40, 100)
-        self.ball = Ball(radius=20, color=arcade.color.DARK_RED, x=40, y=100)
-        self.sprite_list.append(self.ball)
-```
-to
 ```python
 class Ball(arcade.SpriteSolidColor):
     def __init__(self, width, height, c, x, y):
         super().__init__(width, height, x, y, c)
+```        
+to
+```python
 class Ball(arcade.SpriteCircle):
     def __init__(self, radius, color, x, y):
         super().__init__(radius, color)
@@ -72,6 +66,23 @@ class Ball(arcade.SpriteCircle):
         self.center_y = y
         self.x_velocity = 3
 ```
+
+Change
+
+```python
+    def setup(self):
+        self.sprite_list = arcade.SpriteList()
+        self.ball = Ball(20, 20, arcade.color.RED, 40, 100)
+        self.sprite_list.append(self.ball)
+```
+to
+```python
+    def setup(self):
+        self.sprite_list = arcade.SpriteList()
+        self.ball = Ball(radius=20, color=arcade.color.DARK_RED, x=40, y=100)
+        self.sprite_list.append(self.ball)
+```
+
 
 Build and run
 
