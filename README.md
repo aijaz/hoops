@@ -265,6 +265,12 @@ Change on_update
 ```
 
 # 8 Collision detection
+Add
+```python
+from arcade import  check_for_collision_with_list
+```
+to the top of the file
+
 
 In `on_update` change
 ```python
