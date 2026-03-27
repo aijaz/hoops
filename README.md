@@ -134,6 +134,11 @@ Add
 ```
 to the bottom of setup:
 
+Add
+```python
+        self.obstacles_sprite_list.draw()
+```
+to the bottom of Court's `on_draw`
 
 # 4 Remove Velocity
 
