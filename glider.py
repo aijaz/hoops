@@ -46,6 +46,7 @@ class GameView(arcade.Window):
 
         self.cur_key_press = None
         self.currently_over_vent = False
+        self.glider_direction = 'right'
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -66,6 +67,12 @@ class GameView(arcade.Window):
 
         if self.cur_key_press == arcade.key.LEFT:
             self.glider.center_x -= self.glider.change_x * 0.9  # apply brakes
+            if self.glider_direction == 'left':
+                self.glider_direction = 'right'
+                self.glider.set_texture(0)
+            else:
+                self.glider_direction = 'left'
+                self.glider.set_texture(1)
 
         still_over_vent = False
         for vent in self.vents:
@@ -75,8 +82,8 @@ class GameView(arcade.Window):
                 still_over_vent = True
                 break
 
+        # If we get off the vent
         if self.currently_over_vent and not still_over_vent:
-            print("Here")
             self.currently_over_vent = False
             self.glider.change_y = 0
 
@@ -94,12 +101,7 @@ class GameView(arcade.Window):
         arcade.draw_sprite(self.glider)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
-        if symbol == arcade.key.RIGHT:
-            self.cur_key_press = arcade.key.RIGHT
-            if self.glider_direction == 'left':
-                self.glider_direction = 'right'
-                self.glider.set_texture(0)
-        elif symbol == arcade.key.LEFT:
+        if symbol == arcade.key.LEFT and self.currently_over_vent:
             self.cur_key_press = arcade.key.LEFT
             if self.glider_direction == 'right':
                 self.glider_direction = 'left'
@@ -111,6 +113,10 @@ class GameView(arcade.Window):
 
     def on_key_release(self, symbol: int, modifiers: int) -> EVENT_HANDLE_STATE:
         self.cur_key_press = None
+        if symbol == arcade.key.LEFT:
+            self.glider_direction = 'right'
+            self.glider.set_texture(0)
+
 
 
 def main():
