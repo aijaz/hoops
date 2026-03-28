@@ -11,7 +11,8 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
 GRAVITY = 0.1
-JUMP_SPEED = 20
+JUMP_SPEED = 0
+VENT_JUMP = 3
 
 
 class GameView(arcade.Window):
@@ -56,6 +57,7 @@ class GameView(arcade.Window):
         self.glider.set_texture(0)
         self.camera = arcade.Camera2D()
         self.glider.change_x = 3
+        self.glider.change_y = 0
         self.cur_key_press = None
 
     def on_update(self, delta_time: float) -> bool | None:
@@ -66,6 +68,11 @@ class GameView(arcade.Window):
 
         if self.cur_key_press == arcade.key.LEFT:
             self.glider.center_x -= self.glider.change_x / 2  # apply brakes
+
+        for vent in self.vents:
+            if abs(vent.center_x - self.glider.center_x) < vent.width:
+                self.glider.change_y = VENT_JUMP
+                break
 
         # Center our camera on the player - x axis only
         target_x = self.glider.center_x
@@ -101,6 +108,8 @@ class GameView(arcade.Window):
             if self.glider_direction == 'right':
                 self.glider_direction = 'left'
                 self.glider.set_texture(1)
+        elif symbol == arcade.key.UP:
+            self.glider.change_y = JUMP_SPEED
         elif symbol == arcade.key.ESCAPE:
             self.setup()
 
