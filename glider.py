@@ -4,6 +4,7 @@ Platformer Game
 python -m arcade.examples.platform_tutorial.02_draw_sprites
 """
 import arcade
+from pyglet.event import EVENT_HANDLE_STATE
 
 # Constants
 WINDOW_WIDTH = 1280
@@ -43,6 +44,7 @@ class GameView(arcade.Window):
         )
 
         self.camera = None
+        self.cur_key_press = None
 
 
 
@@ -53,6 +55,8 @@ class GameView(arcade.Window):
         self.glider_direction = 'right'
         self.glider.set_texture(0)
         self.camera = arcade.Camera2D()
+        self.glider.change_x = 3
+        self.cur_key_press = None
 
     def on_update(self, delta_time: float) -> bool | None:
         """Movement and Game Logic"""
@@ -60,8 +64,8 @@ class GameView(arcade.Window):
         # Move the player using our physics engine
         self.physics_engine.update()
 
-        # Center our camera on the player
-        self.glider.change_x = 3
+        if self.cur_key_press == arcade.key.LEFT:
+            self.glider.center_x -= self.glider.change_x / 2  # apply brakes
 
         # Center our camera on the player - x axis only
         target_x = self.glider.center_x
@@ -88,16 +92,20 @@ class GameView(arcade.Window):
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.RIGHT:
+            self.cur_key_press = arcade.key.RIGHT
             if self.glider_direction == 'left':
                 self.glider_direction = 'right'
                 self.glider.set_texture(0)
         elif symbol == arcade.key.LEFT:
+            self.cur_key_press = arcade.key.LEFT
             if self.glider_direction == 'right':
                 self.glider_direction = 'left'
                 self.glider.set_texture(1)
         elif symbol == arcade.key.ESCAPE:
             self.setup()
 
+    def on_key_release(self, symbol: int, modifiers: int) -> EVENT_HANDLE_STATE:
+        self.cur_key_press = None
 
 
 def main():
