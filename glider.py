@@ -33,7 +33,7 @@ class GameView(arcade.Window):
         self.obstacles = arcade.SpriteList()
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
-        self.floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 0, arcade.color.BLACK)
+        self.floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 60, arcade.color.BLACK)
         self.obstacles.append(self.floor)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
@@ -133,15 +133,23 @@ class GameView(arcade.Window):
 
         if self.level == 1:
             self.glider.center_y = 500
-            v = arcade.Sprite("vent.png", scale=0.3)
-            v.center_x = 650
-            v.center_y = 60
-            self.vents.append(v)
+            for x in 650, 950:
+                v = arcade.Sprite("vent.png", scale=0.3)
+                v.center_x = x
+                v.center_y = 60
+                self.vents.append(v)
         elif self.level == 2:
-            v = arcade.Sprite("vent.png", scale=0.3)
-            v.center_x = 300
-            v.center_y = 60
-            self.vents.append(v)
+            for x in 300, 850:
+                v = arcade.Sprite("vent.png", scale=0.3)
+                v.center_x = x
+                v.center_y = 60
+                self.vents.append(v)
+        elif self.level == 3:
+            for x in 400, 850:
+                v = arcade.Sprite("vent.png", scale=0.3)
+                v.center_x = x
+                v.center_y = 60
+                self.vents.append(v)
 
 def main():
     """Main function"""
