@@ -24,15 +24,15 @@ class GameView(arcade.Window):
         # Separate variable that holds the player sprite
         self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"))
         self.glider.append_texture(arcade.load_texture("glider_left.png"))
-        self.glider.center_x = 600
-        self.glider.center_y = 500
-        self.glider_direction = 'right'
 
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
-        pass
+        self.glider.center_x = 150
+        self.glider.center_y = 500
+        self.glider_direction = 'right'
+        self.glider.set_texture(0)
 
     def on_draw(self):
         """Render the screen."""
