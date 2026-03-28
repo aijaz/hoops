@@ -47,6 +47,7 @@ class GameView(arcade.Window):
         self.cur_key_press = None
         self.currently_over_vent = False
         self.glider_direction = 'right'
+        self.vent_count = None
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -58,6 +59,7 @@ class GameView(arcade.Window):
         self.glider.change_y = 0
         self.cur_key_press = None
         self.currently_over_vent = False
+        self.vent_count = 0
 
     def on_update(self, delta_time: float) -> bool | None:
         """Movement and Game Logic"""
@@ -67,12 +69,15 @@ class GameView(arcade.Window):
 
         if self.cur_key_press == arcade.key.LEFT:
             self.glider.center_x -= self.glider.change_x * 0.9  # apply brakes
-            if self.glider_direction == 'left':
-                self.glider_direction = 'right'
-                self.glider.set_texture(0)
-            else:
-                self.glider_direction = 'left'
-                self.glider.set_texture(1)
+            self.vent_count += 1
+            if self.vent_count == 4:
+                self.vent_count = 0
+                if self.glider_direction == 'left':
+                    self.glider_direction = 'right'
+                    self.glider.set_texture(0)
+                else:
+                    self.glider_direction = 'left'
+                    self.glider.set_texture(1)
 
         still_over_vent = False
         for vent in self.vents:
