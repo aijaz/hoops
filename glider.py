@@ -10,9 +10,9 @@ from pyglet.event import EVENT_HANDLE_STATE
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
-GRAVITY = 0.01
+GRAVITY = 0.02
 JUMP_SPEED = 0
-VENT_JUMP = 1
+VENT_JUMP = 3
 
 
 class GameView(arcade.Window):
@@ -44,8 +44,8 @@ class GameView(arcade.Window):
             self.glider, walls=self.obstacles, gravity_constant=GRAVITY
         )
 
-        self.camera = None
         self.cur_key_press = None
+        self.currently_over_vent = False
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -53,10 +53,10 @@ class GameView(arcade.Window):
         self.glider.center_y = 500
         self.glider_direction = 'right'
         self.glider.set_texture(0)
-        self.camera = arcade.Camera2D()
         self.glider.change_x = 3
         self.glider.change_y = 0
         self.cur_key_press = None
+        self.currently_over_vent = False
 
     def on_update(self, delta_time: float) -> bool | None:
         """Movement and Game Logic"""
@@ -65,28 +65,26 @@ class GameView(arcade.Window):
         self.physics_engine.update()
 
         if self.cur_key_press == arcade.key.LEFT:
-            self.glider.center_x -= self.glider.change_x * 0.75  # apply brakes
+            self.glider.center_x -= self.glider.change_x * 0.9  # apply brakes
 
+        still_over_vent = False
         for vent in self.vents:
             if abs(vent.center_x - self.glider.center_x) < vent.width:
                 self.glider.change_y = VENT_JUMP
+                self.currently_over_vent = True
+                still_over_vent = True
                 break
 
-        # Center our camera on the player - x axis only
-        target_x = self.glider.center_x
-        target_y = WINDOW_HEIGHT/2
-        self.camera.position = (target_x, target_y)
-
-
+        if self.currently_over_vent and not still_over_vent:
+            print("Here")
+            self.currently_over_vent = False
+            self.glider.change_y = 0
 
     def on_draw(self):
         """Render the screen."""
 
         # Clear the screen to the background color
         self.clear()
-
-        # activate our camera before drawing
-        self.camera.use()
 
         # Draw vents
         self.vents.draw()
