@@ -10,9 +10,9 @@ from pyglet.event import EVENT_HANDLE_STATE
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
-GRAVITY = 0.1
+GRAVITY = 0.01
 JUMP_SPEED = 0
-VENT_JUMP = 3
+VENT_JUMP = 1
 
 
 class GameView(arcade.Window):
@@ -26,11 +26,11 @@ class GameView(arcade.Window):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
         # Separate variable that holds the player sprite
-        self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"))
+        self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"), scale=0.5)
         self.glider.append_texture(arcade.load_texture("glider_left.png"))
 
         self.vents = arcade.SpriteList()
-        v = arcade.Sprite("vent.png")
+        v = arcade.Sprite("vent.png", scale=0.3)
         v.center_x = 800
         v.center_y = 60
         self.vents.append(v)
@@ -46,8 +46,6 @@ class GameView(arcade.Window):
 
         self.camera = None
         self.cur_key_press = None
-
-
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -67,7 +65,7 @@ class GameView(arcade.Window):
         self.physics_engine.update()
 
         if self.cur_key_press == arcade.key.LEFT:
-            self.glider.center_x -= self.glider.change_x / 2  # apply brakes
+            self.glider.center_x -= self.glider.change_x * 0.75  # apply brakes
 
         for vent in self.vents:
             if abs(vent.center_x - self.glider.center_x) < vent.width:
@@ -90,12 +88,12 @@ class GameView(arcade.Window):
         # activate our camera before drawing
         self.camera.use()
 
-        # Draw our sprites
-        arcade.draw_sprite(self.glider)
-
         # Draw vents
         self.vents.draw()
         self.obstacles.draw()
+
+        # Draw our sprites
+        arcade.draw_sprite(self.glider)
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.RIGHT:
