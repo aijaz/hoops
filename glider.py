@@ -9,6 +9,8 @@ import arcade
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
+GRAVITY = 0.1
+JUMP_SPEED = 20
 
 
 class GameView(arcade.Window):
@@ -36,18 +38,39 @@ class GameView(arcade.Window):
         floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 0, arcade.color.BLACK)
         self.obstacles.append(floor)
 
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.glider, walls=self.obstacles, gravity_constant=GRAVITY
+        )
+
+        self.camera = None
+
+
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         self.glider.center_x = 150
         self.glider.center_y = 500
         self.glider_direction = 'right'
         self.glider.set_texture(0)
+        self.camera = arcade.Camera2D()
+
+    def on_update(self, delta_time: float) -> bool | None:
+        """Movement and Game Logic"""
+
+        # Move the player using our physics engine
+        self.physics_engine.update()
+
+        # Center our camera on the player
+        self.glider.change_x = 3
 
     def on_draw(self):
         """Render the screen."""
 
         # Clear the screen to the background color
         self.clear()
+
+        # activate our camera before drawing
+        self.camera.use()
 
         # Draw our sprites
         arcade.draw_sprite(self.glider)
@@ -65,6 +88,8 @@ class GameView(arcade.Window):
             if self.glider_direction == 'right':
                 self.glider_direction = 'left'
                 self.glider.set_texture(1)
+        elif symbol == arcade.key.ESCAPE:
+            self.setup()
 
 
 
