@@ -25,6 +25,11 @@ class GameView(arcade.Window):
         self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"))
         self.glider.append_texture(arcade.load_texture("glider_left.png"))
 
+        self.vents = arcade.SpriteList()
+        v = arcade.Sprite("vent.png")
+        v.center_x = 800
+        v.center_y = 60
+        self.vents.append(v)
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
     def setup(self):
@@ -42,6 +47,9 @@ class GameView(arcade.Window):
 
         # Draw our sprites
         arcade.draw_sprite(self.glider)
+
+        # Draw vents
+        self.vents.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.RIGHT:
