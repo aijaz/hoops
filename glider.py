@@ -30,15 +30,11 @@ class GameView(arcade.Window):
         self.glider.append_texture(arcade.load_texture("glider_left.png"))
 
         self.vents = arcade.SpriteList()
-        v = arcade.Sprite("vent.png", scale=0.3)
-        v.center_x = 800
-        v.center_y = 60
-        self.vents.append(v)
+        self.obstacles = arcade.SpriteList()
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
-        self.obstacles = arcade.SpriteList()
-        floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 0, arcade.color.BLACK)
-        self.obstacles.append(floor)
+        self.floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 0, arcade.color.BLACK)
+        self.obstacles.append(self.floor)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.glider, walls=self.obstacles, gravity_constant=GRAVITY
@@ -52,8 +48,6 @@ class GameView(arcade.Window):
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
-        self.glider.center_x = 150
-        self.glider.center_y = 500
         self.glider_direction = 'right'
         self.glider.set_texture(0)
         self.glider.change_x = 3
@@ -61,7 +55,7 @@ class GameView(arcade.Window):
         self.cur_key_press = None
         self.currently_over_vent = False
         self.vent_count = 0
-        self.level = 0
+        self.level = 1
 
     def on_update(self, delta_time: float) -> bool | None:
         """Movement and Game Logic"""
@@ -99,7 +93,7 @@ class GameView(arcade.Window):
 
     def handle_new_level(self):
         self.level += 1
-        print(f"Level {self.level}")
+        self.setup_level()
 
     def on_draw(self):
         """Render the screen."""
@@ -131,12 +125,29 @@ class GameView(arcade.Window):
             self.glider_direction = 'right'
             self.glider.set_texture(0)
 
+    def setup_level(self):
+        self.glider.center_x = 0
+        self.obstacles.clear()
+        self.obstacles.append(self.floor)
+        self.vents.clear()
 
+        if self.level == 1:
+            self.glider.center_y = 500
+            v = arcade.Sprite("vent.png", scale=0.3)
+            v.center_x = 650
+            v.center_y = 60
+            self.vents.append(v)
+        elif self.level == 2:
+            v = arcade.Sprite("vent.png", scale=0.3)
+            v.center_x = 300
+            v.center_y = 60
+            self.vents.append(v)
 
 def main():
     """Main function"""
     window = GameView()
     window.setup()
+    window.setup_level()
     arcade.run()
 
 
