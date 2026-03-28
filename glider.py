@@ -63,6 +63,11 @@ class GameView(arcade.Window):
         # Center our camera on the player
         self.glider.change_x = 3
 
+        # Center our camera on the player
+        self.camera.position[0] = self.glider.position[0]
+
+
+
     def on_draw(self):
         """Render the screen."""
 
