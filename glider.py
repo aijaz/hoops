@@ -63,8 +63,10 @@ class GameView(arcade.Window):
         # Center our camera on the player
         self.glider.change_x = 3
 
-        # Center our camera on the player
-        self.camera.position[0] = self.glider.position[0]
+        # Center our camera on the player - x axis only
+        target_x = self.glider.center_x
+        target_y = WINDOW_HEIGHT/2
+        self.camera.position = (target_x, target_y)
 
 
 
