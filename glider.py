@@ -21,15 +21,12 @@ class GameView(arcade.Window):
         # Call the parent class and set up the window
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
-        # Variable to hold our texture for our player
-        self.player_texture = arcade.load_texture(
-            "glider_right.png"
-        )
-
         # Separate variable that holds the player sprite
-        self.glider = arcade.Sprite(self.player_texture)
+        self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"))
+        self.glider.append_texture(arcade.load_texture("glider_left.png"))
         self.glider.center_x = 600
         self.glider.center_y = 500
+        self.glider_direction = 'right'
 
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
@@ -45,6 +42,17 @@ class GameView(arcade.Window):
 
         # Draw our sprites
         arcade.draw_sprite(self.glider)
+
+    def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
+        if symbol == arcade.key.RIGHT:
+            if self.glider_direction == 'left':
+                self.glider_direction = 'right'
+                self.glider.set_texture(0)
+        elif symbol == arcade.key.LEFT:
+            if self.glider_direction == 'right':
+                self.glider_direction = 'left'
+                self.glider.set_texture(1)
+
 
 
 def main():
