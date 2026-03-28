@@ -32,6 +32,10 @@ class GameView(arcade.Window):
         self.vents.append(v)
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
+        self.obstacles = arcade.SpriteList()
+        floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 0, arcade.color.BLACK)
+        self.obstacles.append(floor)
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         self.glider.center_x = 150
@@ -50,6 +54,7 @@ class GameView(arcade.Window):
 
         # Draw vents
         self.vents.draw()
+        self.obstacles.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.RIGHT:
