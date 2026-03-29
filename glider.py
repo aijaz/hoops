@@ -37,6 +37,7 @@ class GameView(arcade.View):
         self.vents = arcade.SpriteList(use_spatial_hash=True)
         self.obstacles = arcade.SpriteList()
         self.coins = arcade.SpriteList(use_spatial_hash=True)
+        self.spinners = []
 
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
@@ -62,7 +63,6 @@ class GameView(arcade.View):
         self.lives = None
         self.score = None
         self.level_constraints = self.load_level_constraints()
-        self.spinner = None
         self.degrees = 0
 
     def setup(self):
@@ -108,10 +108,8 @@ class GameView(arcade.View):
                 break
 
         self.degrees += 1
-        self.spinner.angle = self.degrees
-        # self.spinner.position = rotate_point(
-        #     self.spinner.center_x, self.spinner.center_y,
-        #    self.spinner.center_x, self.spinner.center_y, self.degrees)
+        for spinner in self.spinners:
+            spinner.angle = self.degrees
 
 
         # If we get off the vent
@@ -208,6 +206,8 @@ class GameView(arcade.View):
         self.obstacles.append(self.floor)
         self.vents.clear()
         self.coins.clear()
+        self.spinners = []
+        self.degrees = 0
         data = self.level_constraints[self.level - 1]
         self.glider.center_y = data["glider_y"]
         for x in data["vent_x"]:
@@ -221,11 +221,12 @@ class GameView(arcade.View):
             coin.center_y = y
             self.coins.append(coin)
         for x, y, w, h in data["shelf_xywh"]:
-            shelf = arcade.SpriteSolidColor(w, h, x, y, arcade.color.WHITE)
+            shelf = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
             self.obstacles.append(shelf)
-
-        self.spinner = arcade.SpriteSolidColor(100, 4, 300, 300, arcade.color.DARK_BLUE_GRAY)
-        self.obstacles.append(self.spinner)
+        for x, y, w, h in data.get("spinner_xywh", []):
+            spinner = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
+            self.obstacles.append(spinner)
+            self.spinners.append(spinner)
 
     def load_level_constraints(self):
         return [
@@ -233,13 +234,20 @@ class GameView(arcade.View):
                 "glider_y": 500,
                 "vent_x": [650, 950],
                 "coin_xy": [(384, 300), (640, 350), (900, 500)],
-                "shelf_xywh": []
+                "shelf_xywh": [],
             },
             {
                 "glider_y": 500,
                 "vent_x": [300, 850],
                 "coin_xy": [(384, 300), (640, 350), (900, 500)],
-                "shelf_xywh": [(800, 400, SCREENWIDTH / 2, 4)]
+                "shelf_xywh": [(800, 400, SCREENWIDTH / 2, 4)],
+            },
+            {
+                "glider_y": 500,
+                "vent_x": [650, 950],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [],
+                "spinner_xywh": [(800, 300, SCREENWIDTH / 2, 8)]
             },
         ]
 
