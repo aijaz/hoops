@@ -29,8 +29,10 @@ class GameView(arcade.Window):
         self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"), scale=0.5)
         self.glider.append_texture(arcade.load_texture("glider_left.png"))
 
-        self.vents = arcade.SpriteList()
+        self.vents = arcade.SpriteList(use_spatial_hash=True)
         self.obstacles = arcade.SpriteList()
+        self.coins = arcade.SpriteList(use_spatial_hash=True)
+
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
         self.floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 60, arcade.color.BLACK)
@@ -46,6 +48,7 @@ class GameView(arcade.Window):
         self.vent_count = None
         self.level = None
         self.lives = None
+        self.score = None
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -58,6 +61,7 @@ class GameView(arcade.Window):
         self.vent_count = 0
         self.level = 1
         self.lives = 3
+        self.score = 0
 
     def on_update(self, delta_time: float) -> bool | None:
         """Movement and Game Logic"""
@@ -94,7 +98,12 @@ class GameView(arcade.Window):
             self.handle_new_level()
 
         obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
-        print(obstacles_hit)
+        coin_hit_list = arcade.check_for_collision_with_list(self.glider, self.coins)
+
+        for coin in coin_hit_list:
+            coin.remove_from_sprite_lists()
+            self.score += 1
+            print(f"Score: {self.score}")
 
         if self.physics_engine.can_jump():
             self.lose_life()
@@ -105,6 +114,8 @@ class GameView(arcade.Window):
         self.setup_level()
 
     def lose_life(self):
+        if self.lives == 0:
+            return
         self.lives -= 1
         print(f"Lives: {self.lives}")
         if self.lives == 0:
@@ -123,6 +134,7 @@ class GameView(arcade.Window):
         # Draw vents
         self.vents.draw()
         self.obstacles.draw()
+        self.coins.draw()
 
         # Draw our sprites
         arcade.draw_sprite(self.glider)
@@ -137,6 +149,7 @@ class GameView(arcade.Window):
             self.glider.change_y = JUMP_SPEED
         elif symbol == arcade.key.ESCAPE:
             self.setup()
+            self.setup_level()
 
     def on_key_release(self, symbol: int, modifiers: int) -> EVENT_HANDLE_STATE:
         self.cur_key_press = None
@@ -157,6 +170,13 @@ class GameView(arcade.Window):
                 v.center_x = x
                 v.center_y = 60
                 self.vents.append(v)
+            # Add coins to the world
+            for x in range(128, 1250, 256):
+                coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
+                coin.center_x = x
+                coin.center_y = 300
+                self.coins.append(coin)
+
         elif self.level == 2:
             for x in 300, 850:
                 v = arcade.Sprite("vent.png", scale=0.3)
