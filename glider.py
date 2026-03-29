@@ -124,13 +124,14 @@ class GameView(arcade.View):
         self.setup_level()
 
     def you_won(self):
-        print("You won")
+        you_won_view = YouWonView()
+        self.window.show_view(you_won_view)
 
     def lose_life(self):
         if self.lives == 0:
             return
         self.lives -= 1
-        print(f"Lives: {self.lives}")
+
         if self.lives == 0:
             self.game_over()
         else:
@@ -242,6 +243,33 @@ class GameOverView(arcade.View):
         text_2 = arcade.Text("Press any Key to Restart",
                              self.window.width / 2,
                              self.window.height / 2 - 75,
+                             batch=batch,
+                             color=arcade.color.WHITE,
+                             font_size=50,
+                             anchor_x='center')
+
+        batch.draw()
+
+    def on_key_press(self, symbol, modifiers):
+        """ If the user presses the mouse button, start the game. """
+        start_view = GameView()
+        start_view.setup()
+        start_view.setup_level()
+        self.window.show_view(start_view)
+
+
+class YouWonView(arcade.View):
+    def on_show_view(self):
+        """ This is run once when we switch to this view """
+        self.window.background_color = arcade.csscolor.DARK_SLATE_BLUE
+
+    def on_draw(self):
+        """ Draw this view """
+        self.clear()
+        batch = Batch()
+        text_1 = arcade.Text("You Made It!",
+                             self.window.width / 2,
+                             self.window.height / 2,
                              batch=batch,
                              color=arcade.color.WHITE,
                              font_size=50,
