@@ -178,12 +178,14 @@ class GameView(arcade.Window):
                 self.coins.append(coin)
 
         elif self.level == 2:
+            self.glider.center_y = 500
             for x in 300, 850:
                 v = arcade.Sprite("vent.png", scale=0.3)
                 v.center_x = x
                 v.center_y = 60
                 self.vents.append(v)
         elif self.level == 3:
+            self.glider.center_y = 600
             for x in 400, 850:
                 v = arcade.Sprite("vent.png", scale=0.3)
                 v.center_x = x
