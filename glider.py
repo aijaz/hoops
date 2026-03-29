@@ -50,6 +50,9 @@ class GameView(arcade.View):
             self.glider, walls=None, gravity_constant=GRAVITY
         )
 
+        self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
+        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
+
         self.cur_key_press = None
         self.currently_over_vent = False
         self.glider_direction = 'right'
@@ -94,6 +97,8 @@ class GameView(arcade.View):
         for vent in self.vents:
             if abs(vent.center_x - self.glider.center_x) < vent.width:
                 self.glider.change_y = VENT_JUMP
+                if not self.currently_over_vent:
+                    arcade.sound.play_sound(self.jump_sound)
                 self.currently_over_vent = True
                 still_over_vent = True
                 break
@@ -107,6 +112,8 @@ class GameView(arcade.View):
             self.handle_new_level()
 
         coin_hit_list = arcade.check_for_collision_with_list(self.glider, self.coins)
+        if coin_hit_list:
+            arcade.sound.play_sound(self.collect_coin_sound)
 
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
