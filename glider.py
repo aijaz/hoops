@@ -46,6 +46,7 @@ class GameView(arcade.View):
                                              WINDOW_WIDTH / 2,
                                              FLOOR_Y,
                                              arcade.color.BLACK)
+        self.floor.alpha = 0
         self.obstacles.append(self.floor)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
@@ -234,6 +235,12 @@ class GameView(arcade.View):
                 "glider_y": 500,
                 "vent_x": [650, 950],
                 "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [],
+            },
+            {
+                "glider_y": 200,
+                "vent_x": [150, 950],
+                "coin_xy": [],
                 "shelf_xywh": [],
             },
             {
