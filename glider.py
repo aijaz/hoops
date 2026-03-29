@@ -41,7 +41,7 @@ class GameView(arcade.View):
 
         self.floor = arcade.SpriteSolidColor(WINDOW_WIDTH,
                                              1,
-                                             WINDOW_WIDTH/2,
+                                             WINDOW_WIDTH / 2,
                                              FLOOR_Y,
                                              arcade.color.BLACK)
         self.obstacles.append(self.floor)
@@ -106,13 +106,11 @@ class GameView(arcade.View):
         if self.glider.center_x >= WINDOW_WIDTH:
             self.handle_new_level()
 
-
         coin_hit_list = arcade.check_for_collision_with_list(self.glider, self.coins)
 
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
             self.score += 1
-            print(f"Score: {self.score}")
 
         obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
         if obstacles_hit:
@@ -123,7 +121,6 @@ class GameView(arcade.View):
             self.you_won()
             return
         self.level += 1
-        print(f"Level {self.level}")
         self.setup_level()
 
     def you_won(self):
@@ -156,6 +153,16 @@ class GameView(arcade.View):
 
         # Draw our sprites
         arcade.draw_sprite(self.glider)
+
+        batch = Batch()
+        text = arcade.Text(f"Level: {self.level} Lives: {self.lives} Score: {self.score}",
+                           WINDOW_WIDTH - 10,
+                           40,
+                           batch=batch,
+                           color=arcade.color.BLACK,
+                           font_size=18,
+                           anchor_x='right')
+        batch.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> bool | None:
         if symbol == arcade.key.LEFT and self.currently_over_vent:
@@ -210,7 +217,7 @@ class GameView(arcade.View):
                 "glider_y": 500,
                 "vent_x": [300, 850],
                 "coin_xy": [(384, 300), (640, 350), (900, 500)],
-                "shelf_xywh": [(800, 400, SCREENWIDTH/2, 4)]
+                "shelf_xywh": [(800, 400, SCREENWIDTH / 2, 4)]
             },
         ]
 
@@ -242,8 +249,6 @@ class GameOverView(arcade.View):
 
         batch.draw()
 
-
-
     def on_key_press(self, symbol, modifiers):
         """ If the user presses the mouse button, start the game. """
         start_view = GameView()
@@ -260,7 +265,6 @@ def main():
     start_view.setup_level()
     window.show_view(start_view)
     arcade.run()
-
 
 
 if __name__ == "__main__":
