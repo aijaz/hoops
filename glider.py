@@ -3,6 +3,8 @@ Platformer Game
 
 python -m arcade.examples.platform_tutorial.02_draw_sprites
 """
+from turtledemo.nim import SCREENWIDTH
+
 import arcade
 from pyglet.event import EVENT_HANDLE_STATE
 
@@ -13,6 +15,7 @@ WINDOW_TITLE = "Platformer"
 GRAVITY = 0.02
 JUMP_SPEED = 0
 VENT_JUMP = 3
+FLOOR_Y = 60
 
 
 class GameView(arcade.Window):
@@ -35,11 +38,15 @@ class GameView(arcade.Window):
 
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
 
-        self.floor = arcade.SpriteSolidColor(WINDOW_WIDTH, 1, WINDOW_WIDTH/2, 60, arcade.color.BLACK)
+        self.floor = arcade.SpriteSolidColor(WINDOW_WIDTH,
+                                             1,
+                                             WINDOW_WIDTH/2,
+                                             FLOOR_Y,
+                                             arcade.color.BLACK)
         self.obstacles.append(self.floor)
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.glider, walls=self.obstacles, gravity_constant=GRAVITY
+            self.glider, walls=None, gravity_constant=GRAVITY
         )
 
         self.cur_key_press = None
@@ -49,6 +56,7 @@ class GameView(arcade.Window):
         self.level = None
         self.lives = None
         self.score = None
+        self.level_constraints = self.load_level_constraints()
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -97,7 +105,7 @@ class GameView(arcade.Window):
         if self.glider.center_x >= WINDOW_WIDTH:
             self.handle_new_level()
 
-        obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
+
         coin_hit_list = arcade.check_for_collision_with_list(self.glider, self.coins)
 
         for coin in coin_hit_list:
@@ -105,13 +113,20 @@ class GameView(arcade.Window):
             self.score += 1
             print(f"Score: {self.score}")
 
-        if self.physics_engine.can_jump():
+        obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
+        if obstacles_hit:
             self.lose_life()
 
     def handle_new_level(self):
+        if self.level == len(self.level_constraints):
+            self.you_won()
+            return
         self.level += 1
         print(f"Level {self.level}")
         self.setup_level()
+
+    def you_won(self):
+        print("You won")
 
     def lose_life(self):
         if self.lives == 0:
@@ -122,8 +137,6 @@ class GameView(arcade.Window):
             self.game_over()
         else:
             self.setup_level()
-            print(self.glider.change_x, self.physics_engine.gravity_constant)
-
 
     def game_over(self):
         print("Game Over")
@@ -168,37 +181,39 @@ class GameView(arcade.Window):
         self.obstacles.append(self.floor)
         self.vents.clear()
         self.coins.clear()
+        data = self.level_constraints[self.level - 1]
+        self.glider.center_y = data["glider_y"]
+        for x in data["vent_x"]:
+            v = arcade.Sprite("vent.png", scale=0.3)
+            v.center_x = x
+            v.center_y = 60
+            self.vents.append(v)
+        for x, y in data["coin_xy"]:
+            coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
+            coin.center_x = x
+            coin.center_y = y
+            self.coins.append(coin)
+        for x, y, w, h in data["shelf_xywh"]:
+            shelf = arcade.SpriteSolidColor(w, h, x, y, arcade.color.WHITE)
+            self.obstacles.append(shelf)
 
-        if self.level == 1:
-            self.glider.center_y = 500
-            for x in 650, 950:
-                v = arcade.Sprite("vent.png", scale=0.3)
-                v.center_x = x
-                v.center_y = 60
-                self.vents.append(v)
-            # Add coins to the world
-            for x in range(128, 1250, 256):
-                coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
-                coin.center_x = x
-                coin.center_y = 300
-                self.coins.append(coin)
+    def load_level_constraints(self):
+        return [
+            {
+                "glider_y": 500,
+                "vent_x": [650, 950],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": []
+            },
+            {
+                "glider_y": 500,
+                "vent_x": [300, 850],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [(800, 400, SCREENWIDTH/2, 4)]
+            },
+        ]
 
-        elif self.level == 2:
-            self.glider.center_y = 500
-            for x in 300, 850:
-                v = arcade.Sprite("vent.png", scale=0.3)
-                v.center_x = x
-                v.center_y = 60
-                self.vents.append(v)
-        elif self.level == 3:
-            self.glider.center_y = 600
-            for x in 400, 850:
-                v = arcade.Sprite("vent.png", scale=0.3)
-                v.center_x = x
-                v.center_y = 60
-                self.vents.append(v)
-        elif self.level == 4:
-            self.glider.center_y = 600
+
 
 def main():
     """Main function"""
