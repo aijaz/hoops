@@ -120,6 +120,10 @@ class GameView(arcade.Window):
         print(f"Lives: {self.lives}")
         if self.lives == 0:
             self.game_over()
+        else:
+            self.setup_level()
+            print(self.glider.change_x, self.physics_engine.gravity_constant)
+
 
     def game_over(self):
         print("Game Over")
@@ -159,9 +163,11 @@ class GameView(arcade.Window):
 
     def setup_level(self):
         self.glider.center_x = 0
+        self.glider.change_y = 0
         self.obstacles.clear()
         self.obstacles.append(self.floor)
         self.vents.clear()
+        self.coins.clear()
 
         if self.level == 1:
             self.glider.center_y = 500
@@ -191,6 +197,8 @@ class GameView(arcade.Window):
                 v.center_x = x
                 v.center_y = 60
                 self.vents.append(v)
+        elif self.level == 4:
+            self.glider.center_y = 600
 
 def main():
     """Main function"""
