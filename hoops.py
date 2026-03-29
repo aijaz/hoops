@@ -66,7 +66,7 @@ class Court(arcade.View):
         # check for collisions
         obstacles_hit = []
         if self.t > 2:
-            obstacles_hit = check_for_collision_with_list(self.ball, self.obstacles_sprite_list)
+                obstacles_hit = check_for_collision_with_list(self.ball, self.obstacles_sprite_list)
 
         self.ball.center_x = self.ball.start_x + (self.ball.vx * self.t)
         self.ball.center_y = max(self.ball.radius + 1, self.ball.start_y + (self.ball.vy * self.t) - (0.5 * self.g * self.t**2))

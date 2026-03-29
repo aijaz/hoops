@@ -45,6 +45,7 @@ class GameView(arcade.Window):
         self.glider_direction = 'right'
         self.vent_count = None
         self.level = None
+        self.lives = None
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -56,6 +57,7 @@ class GameView(arcade.Window):
         self.currently_over_vent = False
         self.vent_count = 0
         self.level = 1
+        self.lives = 3
 
     def on_update(self, delta_time: float) -> bool | None:
         """Movement and Game Logic"""
@@ -91,9 +93,26 @@ class GameView(arcade.Window):
         if self.glider.center_x >= WINDOW_WIDTH:
             self.handle_new_level()
 
+        obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
+        print(obstacles_hit)
+
+        if self.physics_engine.can_jump():
+            self.lose_life()
+
     def handle_new_level(self):
         self.level += 1
+        print(f"Level {self.level}")
         self.setup_level()
+
+    def lose_life(self):
+        self.lives -= 1
+        print(f"Lives: {self.lives}")
+        if self.lives == 0:
+            self.game_over()
+
+    def game_over(self):
+        print("Game Over")
+        self.glider.change_x = 0
 
     def on_draw(self):
         """Render the screen."""
