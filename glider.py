@@ -8,6 +8,7 @@ from turtledemo.nim import SCREENWIDTH
 import arcade
 from pyglet.event import EVENT_HANDLE_STATE
 from pyglet.graphics import Batch
+from arcade.math import rotate_point
 
 # Constants
 WINDOW_WIDTH = 1280
@@ -61,6 +62,8 @@ class GameView(arcade.View):
         self.lives = None
         self.score = None
         self.level_constraints = self.load_level_constraints()
+        self.spinner = None
+        self.degrees = 0
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -74,6 +77,7 @@ class GameView(arcade.View):
         self.level = 1
         self.lives = 3
         self.score = 0
+        self.degrees = 0
 
     def on_update(self, delta_time: float) -> bool | None:
         """Movement and Game Logic"""
@@ -102,6 +106,13 @@ class GameView(arcade.View):
                 self.currently_over_vent = True
                 still_over_vent = True
                 break
+
+        self.degrees += 1
+        self.spinner.angle = self.degrees
+        # self.spinner.position = rotate_point(
+        #     self.spinner.center_x, self.spinner.center_y,
+        #    self.spinner.center_x, self.spinner.center_y, self.degrees)
+
 
         # If we get off the vent
         if self.currently_over_vent and not still_over_vent:
@@ -212,6 +223,9 @@ class GameView(arcade.View):
         for x, y, w, h in data["shelf_xywh"]:
             shelf = arcade.SpriteSolidColor(w, h, x, y, arcade.color.WHITE)
             self.obstacles.append(shelf)
+
+        self.spinner = arcade.SpriteSolidColor(100, 4, 300, 300, arcade.color.DARK_BLUE_GRAY)
+        self.obstacles.append(self.spinner)
 
     def load_level_constraints(self):
         return [
