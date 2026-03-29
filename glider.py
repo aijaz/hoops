@@ -7,6 +7,7 @@ from turtledemo.nim import SCREENWIDTH
 
 import arcade
 from pyglet.event import EVENT_HANDLE_STATE
+from pyglet.graphics import Batch
 
 # Constants
 WINDOW_WIDTH = 1280
@@ -18,7 +19,7 @@ VENT_JUMP = 3
 FLOOR_Y = 60
 
 
-class GameView(arcade.Window):
+class GameView(arcade.View):
     """
     Main application class.
     """
@@ -26,7 +27,7 @@ class GameView(arcade.Window):
     def __init__(self):
 
         # Call the parent class and set up the window
-        super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+        super().__init__()
 
         # Separate variable that holds the player sprite
         self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"), scale=0.5)
@@ -139,8 +140,8 @@ class GameView(arcade.Window):
             self.setup_level()
 
     def game_over(self):
-        print("Game Over")
-        self.glider.change_x = 0
+        game_over_view = GameOverView()
+        self.window.show_view(game_over_view)
 
     def on_draw(self):
         """Render the screen."""
@@ -214,13 +215,52 @@ class GameView(arcade.Window):
         ]
 
 
+class GameOverView(arcade.View):
+    def on_show_view(self):
+        """ This is run once when we switch to this view """
+        self.window.background_color = arcade.csscolor.DARK_SLATE_BLUE
+
+    def on_draw(self):
+        """ Draw this view """
+        self.clear()
+        batch = Batch()
+        text_1 = arcade.Text("Game Over",
+                             self.window.width / 2,
+                             self.window.height / 2,
+                             batch=batch,
+                             color=arcade.color.WHITE,
+                             font_size=50,
+                             anchor_x='center')
+
+        text_2 = arcade.Text("Press any Key to Restart",
+                             self.window.width / 2,
+                             self.window.height / 2 - 75,
+                             batch=batch,
+                             color=arcade.color.WHITE,
+                             font_size=50,
+                             anchor_x='center')
+
+        batch.draw()
+
+
+
+    def on_key_press(self, symbol, modifiers):
+        """ If the user presses the mouse button, start the game. """
+        start_view = GameView()
+        start_view.setup()
+        start_view.setup_level()
+        self.window.show_view(start_view)
+
 
 def main():
-    """Main function"""
-    window = GameView()
-    window.setup()
-    window.setup_level()
+    """ Main function """
+    window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+    start_view = GameView()
+    start_view.setup()
+    start_view.setup_level()
+    window.show_view(start_view)
     arcade.run()
+
 
 
 if __name__ == "__main__":
