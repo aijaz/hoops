@@ -462,20 +462,116 @@ You can find the full file as it's supposed to look at the end of this step [her
 
 # 8 Cleaning up the Visuals
 
-```python
-```
-```python
-```
+Now let's clean up the images a bit. First, let's make the floor transparent. 
+Add the following line immediately after you create self.floor in `GameView.__init__`
 
 ```python
+        self.floor.alpha = 0
 ```
-```python
-```
+Also in init, add `, scale=0.5` to the line where you create `self.glider`. This scales the glider down, and makes it smaller. 
+Similarly, add `, scale=0.3` to the line where you create the vent `v`. 
+So now, the `__init__` method should look like this:
 
 ```python
+    def __init__(self):
+
+        # Call the parent class and set up the window
+        super().__init__()
+
+        self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"), scale=0.5)
+        self.glider.append_texture(arcade.load_texture("glider_left.png"))
+
+        self.background_color = arcade.csscolor.CORNFLOWER_BLUE
+        self.glider_direction = None
+
+        # create vents
+        self.vents = arcade.SpriteList()
+        v = arcade.Sprite("vent.png", scale=0.3)
+        v.center_x = 800
+        v.center_y = 60
+        self.vents.append(v)
+
+        # create the obstacles sprite list
+        self.obstacles = arcade.SpriteList()
+
+        # create the floor
+        floor = arcade.SpriteSolidColor(width=WINDOW_WIDTH,
+                                        height=4,
+                                        center_x=WINDOW_WIDTH/2,
+                                        center_y=FLOOR_Y,
+                                        color=arcade.color.BLACK)
+        floor.alpha = 0
+
+        # add the floor to the obstacles list
+        self.obstacles.append(floor)
+
+        # create the physics engine
+        # don't specify any walls, because every collision is either 'fatal'
+        # or a coin-collection
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.glider, walls=None, gravity_constant=GRAVITY
+        )
+
+        self.lives = None
 ```
+
+You can find the full file as it's supposed to look at the end of this step [here](8.py).
+
+# 9 Interacting with the Vents
+
+Now it's time for the glider to interact with the vents. 
+
+## 9.1 Give the glider a boost above the vents
+
+If the glider is above a vent, its `change_y` should be set to a positive number, so it moves up. Eventually, the force of 
+gravity in the physics engine will move it back down. 
+
+Add the following to the end of `GameView.__init__`
 ```python
+
+        # This variable indicates whether the glider is currently over a vent or not
+        self.currently_over_vent = False
 ```
+We also want to reset this variable in `setup_level`, so add this to the bottom of `setup_level` 
+```python
+
+        self.currently_over_vent = False
+```
+Then add the following to the bottom of `GliderView.on_update`
+```python
+
+        still_over_vent = False
+        glider_was_over_vent_before = self.currently_over_vent
+        for vent in self.vents:
+            # If the glider is above the vent (the distance from the vent's center to the glider's center is 
+            # less than the vent's width)
+            if abs(vent.center_x - self.glider.center_x) < vent.width:
+                self.currently_over_vent = True
+                self.glider.change_y = VENT_JUMP  # give the glider a boost
+                if not glider_was_over_vent_before:
+                    # play the jump sound
+                    arcade.sound.play_sound(self.jump_sound)
+                still_over_vent = True
+                # We don't need to check all vents. Stop after you find one that the glider is over.
+                break
+                
+        # If we get off the vent
+        if glider_was_over_vent_before and not still_over_vent:
+            self.currently_over_vent = False
+            self.glider.change_y = 0  # stop the glider from rising further after it leaves the vent
+```
+Look over that code, and make sure you understand it. Ask your instructor if you have any questions. You can see that 
+the code plays a sound the first time the glider goes over a vent. Let's create that sound now. Add the following lines
+to the bottom of `GameView.__init__`
+```python
+
+        # sound to be played when we collect a coin
+        self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav") 
+
+        # sound to be played when the glider goes over a vent
+        self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
+```
+You can find the full file as it's supposed to look at the end of this step [here](9.py).
 
 ```python
 ```
