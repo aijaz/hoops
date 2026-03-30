@@ -571,7 +571,78 @@ to the bottom of `GameView.__init__`
         # sound to be played when the glider goes over a vent
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 ```
+
+## 9.2 Slowing Down over the Vents
+
+Now we need to allow the glider to slow down its horizontal velocity over the vents, 
+allowing it to rise higher than normal. The way to do this is to press the left 
+arrow key to slow down the movement to the right. We'll also make the glider
+oscillate between pointing left and pointing right while it's slowing down - to
+give us a visual queue about what's happening. 
+
+Arcade only informs us when a key is pressed or released. We have to keep track of
+which key is pressed. We can have more than one key pressed at a time, but for this
+game there is only one key that we need to press - the left arrow key. Think 
+of this key as a brake. We'll track which key is pressed in a variable 
+named `current_key_press`. 
+
+Add the following to the bottom of `GameView.__init__`:
+
+```python
+
+        # track what key is currently being pressed
+        self.current_key_press = None
+
+        # track which direction the glider is currently facing
+        self.glider_direction = 'right'
+```
+Then modify `GameView.on_key_press` to look like this:
+```python
+    def on_key_press(self, symbol, modifiers):
+        if symbol == arcade.key.LEFT and self.currently_over_vent:
+            # only handle the press of the LEFT arrow key if the glider is over a vent
+            self.current_key_press = arcade.key.LEFT
+            # Only change the texture if we need to - don't do unnecessary work
+            if self.glider_direction == 'right':  # pointing to the right
+                self.glider_direction = 'left'
+                self.glider.set_texture(1)
+```
+Then, immediately below that, add `on_key_release`
+```python
+
+    def on_key_release(self, symbol, modifiers):
+        self.current_key_press = None
+        if symbol == arcade.key.LEFT:
+            # switch back to the old texture
+            self.glider.set_texture(0)
+            self.glider_direction = 'right'
+```
+Now we need to "apply the brakes." This will be done in `GameView.on_update` 
+Add the following to to bottom on `GameView.on_update`
+```python
+
+        if self.current_key_press == arcade.key.LEFT:
+            self.glider.center_x -= self.glider.change_x * 0.9  # apply brakes
+            # The physics engine already moved the glider to the right. 
+            # Move it 90% of the way back
+            
+            # swap out the texture
+            if self.glider_direction == 'right':
+                self.glider_direction = 'left'
+                self.glider.set_texture(1)
+            else:
+                self.glider_direction = 'right'
+                self.glider.set_texture(0)
+```
+
 You can find the full file as it's supposed to look at the end of this step [here](9.py).
+
+# 10 Slowing down the oscillation
+
+```python
+```
+
+
 
 ```python
 ```

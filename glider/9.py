@@ -48,7 +48,7 @@ class GameView(arcade.View):
         # create the floor
         floor = arcade.SpriteSolidColor(width=WINDOW_WIDTH,
                                         height=4,
-                                        center_x=WINDOW_WIDTH/2,
+                                        center_x=WINDOW_WIDTH / 2,
                                         center_y=FLOOR_Y,
                                         color=arcade.color.BLACK)
         floor.alpha = 0
@@ -71,12 +71,17 @@ class GameView(arcade.View):
         self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
 
+        # track what key is currently being pressed
+        self.current_key_press = None
+
+        # track which direction the glider is currently facing
+        self.glider_direction = 'right'
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         self.glider_direction = 'right'
         self.lives = 3
         self.setup_level()
-
 
     def on_draw(self):
         """Render the screen."""
@@ -94,14 +99,20 @@ class GameView(arcade.View):
         self.obstacles.draw()
 
     def on_key_press(self, symbol, modifiers):
-        if symbol == arcade.key.RIGHT:
-            if self.glider_direction == 'left':
-                self.glider_direction = 'right'
-                self.glider.set_texture(0)
-        elif symbol == arcade.key.LEFT:
-            if self.glider_direction == 'right':
+        if symbol == arcade.key.LEFT and self.currently_over_vent:
+            # only handle the press of the LEFT arrow key if the glider is over a vent
+            self.current_key_press = arcade.key.LEFT
+            # Only change the texture if we need to - don't do unnecessary work
+            if self.glider_direction == 'right':  # pointing to the right
                 self.glider_direction = 'left'
                 self.glider.set_texture(1)
+
+    def on_key_release(self, symbol, modifiers):
+        self.current_key_press = None
+        if symbol == arcade.key.LEFT:
+            # switch back to the old texture
+            self.glider.set_texture(0)
+            self.glider_direction = 'right'
 
     def on_update(self, delta_time):
         """Movement and Game Logic"""
@@ -139,6 +150,21 @@ class GameView(arcade.View):
         if glider_was_over_vent_before and not still_over_vent:
             self.currently_over_vent = False
             self.glider.change_y = 0  # stop the glider from rising further after it leaves the vent
+
+        if self.current_key_press == arcade.key.LEFT:
+            print(f"HERE {self.glider_direction=}")
+            self.glider.center_x -= self.glider.change_x * 0.9  # apply brakes
+            # The physics engine already moved the glider to the right.
+            # Move it 90% of the way back
+
+            # swap out the texture
+            if self.glider_direction == 'right':
+                self.glider_direction = 'left'
+                self.glider.set_texture(1)
+            else:
+                self.glider_direction = 'right'
+                self.glider.set_texture(0)
+
 
     def lose_life(self):
         if self.lives == 0:
