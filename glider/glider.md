@@ -639,18 +639,51 @@ You can find the full file as it's supposed to look at the end of this step [her
 
 # 10 Slowing down the oscillation
 
-```python
-```
+When you run the game you can see that the oscillation is really fast. This is
+because we're changing the orientation of the glider in `on_update` which is called 
+as often as 30 times a second. So we need to slow it down. Let's try changing the
+glider_direction every 4th invocation of `on_update`.
 
-
-
+Add the following global variable to the top of your file, under `FLOOR_Y`:
 ```python
-```
-```python
-```
 
-```python
+# How many calls to on_update to ignore before switching directions
+DIRECTION_DELAY = 4
 ```
+Add the following to the bottom of `GameView.__init__`:
+```python
+
+        # How many calls to on_update have we skipped
+        self.direction_count = 0
+```
+Change the following code in `on_update`
+```python
+            # swap out the texture
+            if self.glider_direction == 'right':
+                self.glider_direction = 'left'
+                self.glider.set_texture(1)
+            else:
+                self.glider_direction = 'right'
+                self.glider.set_texture(0)
+```
+to
+```python
+            # swap out the texture
+            self.direction_count += 1
+            if self.direction_count == 4:
+                # Only swap directions when on every 4th attempt
+                self.direction_count = 0
+                if self.glider_direction == 'right':
+                    self.glider_direction = 'left'
+                    self.glider.set_texture(1)
+                else:
+                    self.glider_direction = 'right'
+                    self.glider.set_texture(0)
+```
+Now the direction change is a lot slower.
+
+You can find the full file as it's supposed to look at the end of this step [here](10.py).
+
 ```python
 ```
 
