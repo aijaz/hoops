@@ -756,20 +756,50 @@ And then define the `print_score` function near the bottom of your file:
                            anchor_x='right')
         batch.draw()
 ```
-You can find the full file as it's supposed to look at the end of this step [here](10.py).
+You can find the full file as it's supposed to look at the end of this step [here](11.py).
 
 # 12 Obstacles
-
+Let's add an obstacle that the user has to get around (or over). Add the following code to the bottom of `GameView.setup_level`
 ```python
+        shelf = arcade.SpriteSolidColor(75, 10, 1100, 550, arcade.color.BLACK)
+        self.obstacles.append(shelf)
 ```
+As you can see, by default the glider will hit the 'shelf.' The only way to avoid it is to hit the left arrow button
+when the glider is over the vent, so that the glider glides above the shelf and gets past it.
 
+Let's add the number of lives to the score display as well. Change `print_score` as follows:
 ```python
+    def print_score(self):
+        batch = Batch()
+        text = arcade.Text(f"Lives: {self.lives} Score: {self.score}",
+                           WINDOW_WIDTH - 10,
+                           40,
+                           batch=batch,
+                           color=arcade.color.BLACK,
+                           font_size=18,
+                           anchor_x='right')
+        batch.draw()
 ```
-
+Now, let's add a sound for when you lose a life. Add the following line to the bottom of `GameView.__init__`
 ```python
+
+        # Lose a life sound
+        self.life_sound = arcade.load_sound(":resources:sounds/explosion2.wav")
 ```
-
+Now, update lose_life to this:
 ```python
+    def lose_life(self):
+        if self.lives == 0:
+            return
+        self.lives -= 1
+
+        if self.lives == 0:
+            # if we're down to zero lives left, call game_over()
+            self.game_over()
+        else:
+            arcade.sound.play_sound(self.life_sound)
+            self.setup_level()
+
 ```
 
 ```python
