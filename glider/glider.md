@@ -458,7 +458,7 @@ in `GameView.setup_level()`. That's it:
         self.glider.change_x = 3
         self.glider.change_y = 0
 ```
-You can find the full file as it's supposed to look at the end of this step [here](6.py).
+You can find the full file as it's supposed to look at the end of this step [here](7.py).
 
 # 8 Cleaning up the Visuals
 
