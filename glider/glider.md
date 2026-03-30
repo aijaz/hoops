@@ -287,30 +287,193 @@ You should see a screen like this:
 
 You can find the full file as it's supposed to look at the end of this step [here](4.py).
 
+# 5 Using a Physics Engine
+
+As we saw in our `hoops` app, it gets tedious managing all of the Newtonian physics
+even for a simple game. This time we will offload this to the simple
+`PhysicsEnginePlatformer` Physics Engine. 
+
+## 5.1 Create the physics engine
+
+Add the following code to the bottom of `GameView.__init__` 
+
 ```python
+
+        # create the physics engine
+        # don't specify any walls, because every collision is either 'fatal'
+        # or a coin-collection
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.glider, walls=None, gravity_constant=GRAVITY
+        )
 ```
+
+## 5.2 Let the Physics Engine do its thing
+
+The physics engine will calculate the new state of all sprites depending on all 
+the forces acting upon them (including, of course, the force of gravity). Now it's 
+time for us to implement `GameView.on_update`. In this method, the physics engine
+will update its state. 
+
+Add the following to the bottom of your `GameView` class.
+
+```python
+
+    def on_update(self, delta_time):
+        """Movement and Game Logic"""
+
+        # Move the player using our physics engine
+        self.physics_engine.update()
+```
+As you can see, gravity is the only force acting on our glider right now, 
+and the glider has no horizontal velocity, so it falls straight down, through the floor.
+We'll fix this soon. 
+
+You can find the full file as it's supposed to look at the end of this step [here](5.py).
+
+# 6 Check for Collisions
+
+Now it's time to start checking for collisions and introducing the concepts of
+'lives' and 'game over'. 
+
+## 6.1 Initialize the number of lives we have in this game
+
+Add the following to the bottom of `GameView.__init__`
+```python
+
+        self.lives = None
+```
+Then add the following to the bottom of `GameView.setup`
+```python
+        self.lives = 3
+```
+## 6.2 Check for Collisions
+
+Now that we have the concept of lives, we need to 'lose a life' every time
+the glider collides with something. Add the following to the bottom of 
+`GameView.on_update`. 
+```python
+
+        # check for collisions
+        obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
+        
+        # if the obstacles_hit list is not empty
+        if obstacles_hit:
+            self.lose_life()
+```
+
+## 6.3 Implement `lose_life`
+
+Every time the glider collides with something the `lose_life` method is called. Now it's
+time for us to implement this method. Add the following code to the bottom of the
+`GameView` class:
+```python
+
+    def lose_life(self):
+        if self.lives == 0:
+            return
+        self.lives -= 1
+
+        if self.lives == 0:
+            # if we're down to zero lives left, call game_over()
+            self.game_over()
+        else:
+            self.setup_level()
+
+    def game_over(self):
+        print("Game Over")
+```
+
+## 6.4 Restart from the starting point
+
+Every time we lose a life we want to start from the beginning location. Eventually,
+when we have levels, we want to restart the current level but for now we just want to
+make sure we restart at the beginning location. 
+
+Find these lines in `GameView.__init__`. We're gonna move them to a new
+method called `GameView.setup_level` that restarts the level
+Delete thse lines.
+```python
+
+        # Position the sprite near the center of the screen
+        self.glider.center_x = 600
+        self.glider.center_y = 500
+```
+Now create a method named `setup_level`. Paste this at the bottom of your `GameView`
+class
+```python
+    def setup_level(self):
+        # Position the sprite near the center of the screen
+        self.glider.center_x = 600
+        self.glider.center_y = 500
+        self.glider.change_x = 0
+        self.glider.change_y = 0
+```
+## 6.5 Stop everything if the game is over
+
+Finally, you want the game to not do anything if the game is over. Insert the following
+code to the _beginning_ of `GameView.on_update`:
+
+```python
+        
+        # Don't do anything if the game is over
+        if self.lives == 0:
+            return
+```
+So, after this, `GameView.on_update` should look like this:
+
+```python
+    def on_update(self, delta_time):
+        """Movement and Game Logic"""
+
+        # Don't do anything if the game is over
+        if self.lives == 0:
+            return
+
+        # Move the player using our physics engine
+        self.physics_engine.update()
+
+        # check for collisions
+        obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
+
+        # if the obstacles_hit list is not empty
+        if obstacles_hit:
+            self.lose_life()
+```
+Now that this is done, you should see that the glider falls 3 times, and then 
+the game is over.
+
+You can find the full file as it's supposed to look at the end of this step [here](6.py).
 
 ```python
 ```
 
 ```python
 ```
-
 ```python
 ```
 
 ```python
 ```
-
 ```python
 ```
 
 ```python
 ```
-
 ```python
 ```
 
+```python
+```
+```python
+```
+
+```python
+```
+```python
+```
+
+```python
+```
 ```python
 ```
 

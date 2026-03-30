@@ -32,10 +32,6 @@ class GameView(arcade.View):
         self.glider = arcade.Sprite(arcade.load_texture("glider_right.png"))
         self.glider.append_texture(arcade.load_texture("glider_left.png"))
 
-        # Position the sprite near the center of the screen
-        self.glider.center_x = 600
-        self.glider.center_y = 500
-
         self.background_color = arcade.csscolor.CORNFLOWER_BLUE
         self.glider_direction = None
 
@@ -66,9 +62,14 @@ class GameView(arcade.View):
             self.glider, walls=None, gravity_constant=GRAVITY
         )
 
+        self.lives = None
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         self.glider_direction = 'right'
+        self.lives = 3
+        self.setup_level()
+
 
     def on_draw(self):
         """Render the screen."""
@@ -98,8 +99,40 @@ class GameView(arcade.View):
     def on_update(self, delta_time):
         """Movement and Game Logic"""
 
+        # Don't do anything if the game is over
+        if self.lives == 0:
+            return
+
         # Move the player using our physics engine
         self.physics_engine.update()
+
+        # check for collisions
+        obstacles_hit = arcade.check_for_collision_with_list(self.glider, self.obstacles)
+
+        # if the obstacles_hit list is not empty
+        if obstacles_hit:
+            self.lose_life()
+
+    def lose_life(self):
+        if self.lives == 0:
+            return
+        self.lives -= 1
+
+        if self.lives == 0:
+            # if we're down to zero lives left, call game_over()
+            self.game_over()
+        else:
+            self.setup_level()
+
+    def game_over(self):
+        print("Game Over")
+
+    def setup_level(self):
+        # Position the sprite near the center of the screen
+        self.glider.center_x = 600
+        self.glider.center_y = 500
+        self.glider.change_x = 0
+        self.glider.change_y = 0
 
 
 def main():
