@@ -670,7 +670,7 @@ to
 ```python
             # swap out the texture
             self.direction_count += 1
-            if self.direction_count == 4:
+            if self.direction_count >= 4:
                 # Only swap directions when on every 4th attempt
                 self.direction_count = 0
                 if self.glider_direction == 'right':
@@ -684,11 +684,374 @@ Now the direction change is a lot slower.
 
 You can find the full file as it's supposed to look at the end of this step [here](10.py).
 
+# 11 Coins
+
+To make the game more interesting lets add some coins to the screen and give the player 100 points for every 
+coin they collect. 
+
+## 11.1 Create and Initialize the Variables
+Add the variable `score` to the bottom of `GameView.__init`. 
+```python
+        
+        # The current score
+        self.score = 0
+
+        # The sprite list containing coins
+        self.coins = arcade.SpriteList(use_spatial_hash=True)
+```
+## 11.2 Add a coin to the game
+Now add a coin to the game. Add the following to the bottom of `setup_level` 
+```python
+
+        coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
+        coin.center_x = 900
+        coin.center_y = 600
+        self.coins.append(coin)
+```
+Then add the following to the end of `GameView.on_draw`
+```python
+
+        # Draw coins
+        self.coins.draw()
+```
+## 11.3 Coin-collecting logic
+Add the following code to the bottom of `GameView.on_update`
+```python
+
+        # Check for collision with coins
+        coin_hit_list = arcade.check_for_collision_with_list(self.glider, self.coins)
+        
+        # Play a sound if we collect one or more coins
+        if coin_hit_list:
+            arcade.sound.play_sound(self.collect_coin_sound)
+
+        # For each coin we collect, remove it from the sprite list and increase our score by 100
+        for coin in coin_hit_list:
+            coin.remove_from_sprite_lists()
+            self.score += 100
+```
+ ## Print the score
+Add the following import near the top of your file:
+```python
+from pyglet.graphics import Batch
+```
+
+Add the following line to the bottom of `GameView.on_draw`
+```python
+
+        # print the score
+        self.print_score()
+```
+And then define the `print_score` function near the bottom of your file:
+
+```python
+    def print_score(self):
+        batch = Batch()
+        text = arcade.Text(f"Score: {self.score}",
+                           WINDOW_WIDTH - 10,
+                           40,
+                           batch=batch,
+                           color=arcade.color.BLACK,
+                           font_size=18,
+                           anchor_x='right')
+        batch.draw()
+```
+You can find the full file as it's supposed to look at the end of this step [here](10.py).
+
+# 12 Obstacles
+
 ```python
 ```
 
 ```python
 ```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+# 13 Levels
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+# 14 Lives
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+# 15 Startup and Game Over Views
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+# 16 Scores
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+# 17 Spinners
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
+```python
+```
+
 ```python
 ```
 

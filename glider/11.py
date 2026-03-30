@@ -3,6 +3,7 @@ Glider Platformer Game
 
 """
 import arcade
+from pyglet.graphics import Batch
 
 # Constants
 WINDOW_WIDTH = 1280
@@ -83,6 +84,12 @@ class GameView(arcade.View):
         # How many calls to on_update have we skipped
         self.direction_count = 0
 
+        # The current score
+        self.score = 0
+
+        # The sprite list containing coins
+        self.coins = arcade.SpriteList(use_spatial_hash=True)
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         self.glider_direction = 'right'
@@ -103,6 +110,12 @@ class GameView(arcade.View):
 
         # Draw obstacles
         self.obstacles.draw()
+
+        # Draw coins
+        self.coins.draw()
+
+        # print the score
+        self.print_score()
 
     def on_key_press(self, symbol, modifiers):
         if symbol == arcade.key.LEFT and self.currently_over_vent:
@@ -174,6 +187,18 @@ class GameView(arcade.View):
                     self.glider_direction = 'right'
                     self.glider.set_texture(0)
 
+        # Check for collision with coins
+        coin_hit_list = arcade.check_for_collision_with_list(self.glider, self.coins)
+
+        # Play a sound if we collect one or more coins
+        if coin_hit_list:
+            arcade.sound.play_sound(self.collect_coin_sound)
+
+        # For each coin we collect, remove it from the sprite list and increase our score by 100
+        for coin in coin_hit_list:
+            coin.remove_from_sprite_lists()
+            self.score += 100
+
 
     def lose_life(self):
         if self.lives == 0:
@@ -196,6 +221,22 @@ class GameView(arcade.View):
         self.glider.change_x = 3
         self.glider.change_y = 0
         self.currently_over_vent = False
+
+        coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
+        coin.center_x = 900
+        coin.center_y = 600
+        self.coins.append(coin)
+
+    def print_score(self):
+        batch = Batch()
+        text = arcade.Text(f"Score: {self.score}",
+                           WINDOW_WIDTH - 10,
+                           40,
+                           batch=batch,
+                           color=arcade.color.BLACK,
+                           font_size=18,
+                           anchor_x='right')
+        batch.draw()
 
 
 def main():
