@@ -444,8 +444,23 @@ the game is over.
 
 You can find the full file as it's supposed to look at the end of this step [here](6.py).
 
+# 7 Moving Forward
+
+We want our glider to move forward at a constant speed. This is easy to do with
+our physics engine. Change `self.glider.change_x = 0` to `self.glider.change_x = 3` 
+in `GameView.setup_level()`. That's it:
+
 ```python
+    def setup_level(self):
+        # Position the sprite near the center of the screen
+        self.glider.center_x = 600
+        self.glider.center_y = 500
+        self.glider.change_x = 3
+        self.glider.change_y = 0
 ```
+You can find the full file as it's supposed to look at the end of this step [here](6.py).
+
+# 8 Cleaning up the Visuals
 
 ```python
 ```
