@@ -50,15 +50,15 @@ class GameView(arcade.View):
         self.obstacles = arcade.SpriteList()
 
         # create the floor
-        floor = arcade.SpriteSolidColor(width=WINDOW_WIDTH,
-                                        height=4,
-                                        center_x=WINDOW_WIDTH / 2,
-                                        center_y=FLOOR_Y,
-                                        color=arcade.color.BLACK)
-        floor.alpha = 0
+        self.floor = arcade.SpriteSolidColor(width=WINDOW_WIDTH,
+                                             height=4,
+                                             center_x=WINDOW_WIDTH / 2,
+                                             center_y=FLOOR_Y,
+                                             color=arcade.color.BLACK)
+        self.floor.alpha = 0
 
         # add the floor to the obstacles list
-        self.obstacles.append(floor)
+        self.obstacles.append(self.floor)
 
         # create the physics engine
         # don't specify any walls, because every collision is either 'fatal'
@@ -95,6 +95,16 @@ class GameView(arcade.View):
 
         # Game Over sound
         self.game_over_sound = arcade.load_sound(":resources:sounds/gameover5.wav")
+
+        # The current level of the game
+        self.current_level = 1
+
+        # The data for each level
+        self.levels = self.get_levels()
+
+        # create the drawings and images sprite lists
+        self.drawings = arcade.SpriteList()
+        self.images = arcade.SpriteList()
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -205,6 +215,9 @@ class GameView(arcade.View):
             coin.remove_from_sprite_lists()
             self.score += 100
 
+        # if the glider has gone off the right edge of the screen
+        if self.glider.center_x >= WINDOW_WIDTH:
+            self.handle_new_level()
 
     def lose_life(self):
         if self.lives == 0:
@@ -223,23 +236,58 @@ class GameView(arcade.View):
         print("Game Over")
 
     def setup_level(self):
-        # Position the sprite near the center of the screen
-        self.glider.center_x = 600
-        self.glider.center_y = 500
+        # Initialize the key state variables
         self.glider.change_x = 3
         self.glider.change_y = 0
         self.currently_over_vent = False
+        self.glider.center_x = 0
 
-        coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
-        coin.center_x = 900
-        coin.center_y = 600
-        self.coins.append(coin)
-        shelf = arcade.SpriteSolidColor(75, 10, 1100, 550, arcade.color.BLACK)
-        self.obstacles.append(shelf)
+        # clear all sprite lists
+        self.obstacles.clear()
+        self.obstacles.append(self.floor)
+        self.vents.clear()
+        self.coins.clear()
+        self.drawings.clear()
+        self.images.clear()
+
+        # load the data for the current level
+        data = self.levels[self.current_level - 1]  # don't forget the -1 here!
+
+        # now set the variables based on the data
+        self.glider.center_y = data.get("glider_y", 600)  # default center_y is 600
+
+        # create the images first, since they're in the background
+        for x, y, p in data.get("shelf_xyp", []):  # if this key is not present, iterate over an empty list
+            image = arcade.Sprite(p)
+            image.center_x = x
+            image.center_y = y
+            self.images.append(image)   # append each image to the image sprite list
+
+        # create the vents
+        for x in data.get("vent_x", []):
+            v = arcade.Sprite("vent.png", scale=0.3)
+            v.center_x = x
+            v.center_y = 60
+            self.vents.append(v)  # append each vent to the vent sprite list
+
+        # create the coins
+        for x, y in data.get("coin_xy", []):
+            coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
+            coin.center_x = x
+            coin.center_y = y
+            self.coins.append(coin)  # append each coin to the coin sprite list
+
+        for x, y, w, h in data.get("shelf_xywh", []):
+            shelf = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
+            self.obstacles.append(shelf)   # append each shelf to the shelf sprite list
+
+        for x, y, w, h in data.get("drawing_xywh", []):
+            drawing = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
+            self.drawings.append(drawing)   # append each drawing to the drawing sprite list
 
     def print_score(self):
         batch = Batch()
-        text = arcade.Text(f"Lives: {self.lives} Score: {self.score}",
+        text = arcade.Text(f"Level: {self.current_level} Lives: {self.lives} Score: {self.score}",
                            WINDOW_WIDTH - 10,
                            40,
                            batch=batch,
@@ -248,6 +296,48 @@ class GameView(arcade.View):
                            anchor_x='right')
         batch.draw()
 
+    def get_levels(self):
+        return [
+            {
+                "glider_y": 500,
+                "vent_x": [650, 950],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [],
+                "drawings_xywh": [],
+                "images_xyp": []
+            },
+            {
+                "glider_y": 200,
+                "vent_x": [150, 950],
+                "coin_xy": [],
+                "shelf_xywh": [],
+            },
+            {
+                "glider_y": 500,
+                "vent_x": [300, 850],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [(800, 400, WINDOW_WIDTH / 2, 4)],
+                "drawings_xywh": [(800, 230, 2, 340)],
+            },
+            {
+                "glider_y": 500,
+                "vent_x": [650, 950],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [],
+                "spinner_xywh": [(800, 300, WINDOW_WIDTH / 2, 8)]
+            },
+        ]
+
+    # Update and set up the new level, or display the "you won" message
+    def handle_new_level(self):
+        if self.current_level == len(self.levels):
+            self.you_won()
+            return
+        self.current_level += 1
+        self.setup_level()
+
+    def you_won(self):
+        print("You won!")
 
 def main():
     """ Main function """

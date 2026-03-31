@@ -785,6 +785,9 @@ Now, let's add a sound for when you lose a life. Add the following line to the b
 
         # Lose a life sound
         self.life_sound = arcade.load_sound(":resources:sounds/explosion2.wav")
+
+        # Game Over sound
+        self.game_over_sound = arcade.load_sound(":resources:sounds/gameover5.wav")
 ```
 Now, update lose_life to this:
 ```python
@@ -795,165 +798,225 @@ Now, update lose_life to this:
 
         if self.lives == 0:
             # if we're down to zero lives left, call game_over()
+            arcade.sound.play_sound(self.game_over_sound)
             self.game_over()
         else:
             arcade.sound.play_sound(self.life_sound)
             self.setup_level()
-
 ```
+You can find the full file as it's supposed to look at the end of this step [here](12.py).
 
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
 
 # 13 Levels
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-# 14 Lives
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
+Now that we have the basic game working, let start working on making and editing levels. 
+
+## 13.1 The Level Data Structure
+The first thing we need to do is define a data structure that will hold all the
+information about a level. What information is this? Well, it's stuff like: 
+
+- What obstacles are there in this level?
+- Where are they located?
+- How many vents are there, and where are they located?
+- What `y` location does the glider start this level at?
+- How many coins are in this level, and where are they located?
+- What non-obstacle drawings are in this level?
+- Are there any images to be displayed in this level?
+
+The simplest data structure to use for this is a dictionary. Let's create a method 
+to load the levels, and put this method at the bottom of the `GameView` class:
+```python
+    def get_levels(self):
+        return [
+            {
+                "glider_y": 500,
+                "vent_x": [650, 950],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [],
+                "drawing_xywh": [],
+                "image_xyp": []
+            },
+            {
+                "glider_y": 200,
+                "vent_x": [150, 950],
+                "coin_xy": [],
+                "shelf_xywh": [],
+            },
+            {
+                "glider_y": 500,
+                "vent_x": [300, 850],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [(800, 400, WINDOW_WIDTH / 2, 4)],
+                "drawing_xywh": [(800, 230, 2, 340)],
+            },
+            {
+                "glider_y": 500,
+                "vent_x": [650, 950],
+                "coin_xy": [(384, 300), (640, 350), (900, 500)],
+                "shelf_xywh": [],
+                "spinner_xywh": [(800, 300, WINDOW_WIDTH / 2, 8)]
+            },
+        ]
+```
+You can see that this method returns a list of dictionaries. Not all keys are in 
+all dictionaries. So, we should not use direct index access to access a key. That
+would throw an Exception if the key isn't in the dictionary. And the app would 
+crash. We should
+use the `.get` method of a dictionary which returns the specified 
+default value (or `None`) if the key isn't in the 
+dictionary.
+
+## 13.2 Creating the Instance Variables for the Levels and the Current Level 
+Add the following code to the bottom of `GameView.__init__`
+```python
+
+        # The current level of the game
+        self.current_level = 1
+        
+        # The data for each level
+        self.levels = self.get_levels()
+```
+## 13.3 Building the Current Level
+Now we need to build the level. We're going to do this in the `setup_level` method. 
+First, we need to delete all the lines that we currently have in `setup_level`, and
+replace them with:
+```python
+        # Initialize the key state variables
+        self.glider.change_x = 3
+        self.glider.change_y = 0
+        self.currently_over_vent = False
+        self.glider.center_x = 0
+
+        # clear all sprite lists
+        self.obstacles.clear()
+        self.obstacles.append(self.floor)
+        self.vents.clear()
+        self.coins.clear()
+        self.drawings.clear()
+        self.images.clear()
+        
+        # load the data for the current level
+        data = self.levels[self.current_level - 1]  # don't forget the -1 here!
+        
+        # now set the variables based on the data
+        self.glider.center_y = data.get("glider_y", 600)  # default center_y is 600
+        
+        # create the images first, since they're in the background
+        for x, y, p in data.get("shelf_xyp", []):  # if this key is not present, iterate over an empty list
+            image = arcade.Sprite(p)
+            image.center_x = x
+            image.center_y = y
+            self.images.append(image)   # append each image to the image sprite list
+        
+        # create the vents
+        for x in data.get("vent_x", []):
+            v = arcade.Sprite("vent.png", scale=0.3)
+            v.center_x = x
+            v.center_y = 60
+            self.vents.append(v)  # append each vent to the vent sprite list
+            
+        # create the coins
+        for x, y in data.get("coin_xy", []):
+            coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=0.25)
+            coin.center_x = x
+            coin.center_y = y
+            self.coins.append(coin)  # append each coin to the coin sprite list
+            
+        for x, y, w, h in data.get("shelf_xywh", []):
+            shelf = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
+            self.obstacles.append(shelf)   # append each shelf to the shelf sprite list
+            
+        for x, y, w, h in data.get("drawing_xywh", []):
+            drawing = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
+            self.drawings.append(drawing)   # append each drawing to the drawing sprite list
 ```
+Make sure you understand all the code above. Ask you instructor if you have any questions. 
 
-```python
-```
+Now we need to create the two new sprite lists: `drawings` and `images`. Add the following 
+code to the bottom of `GameView.__init__`.
 
 ```python
-```
 
-```python
+        # create the drawings and images sprite lists
+        self.drawings = arcade.SpriteList()
+        self.images = arcade.SpriteList()
 ```
+Finally, if you've been paying attention, you'll see that after we clear the `obstacles`
+sprite list above, we add `self.floor` to it. But in our `__init__` method, `floor` is
+a local variable, not an instance variable. So, we need to make it into an instance variable. 
 
+To do that, change these lines in `GameView.__init__`:
 ```python
-```
+        # create the floor
+        floor = arcade.SpriteSolidColor(width=WINDOW_WIDTH,
+                                        height=4,
+                                        center_x=WINDOW_WIDTH / 2,
+                                        center_y=FLOOR_Y,
+                                        color=arcade.color.BLACK)
+        floor.alpha = 0
 
-```python
+        # add the floor to the obstacles list
+        self.obstacles.append(floor)
 ```
-
+to
 ```python
-```
+        # create the floor
+        self.floor = arcade.SpriteSolidColor(width=WINDOW_WIDTH,
+                                             height=4,
+                                             center_x=WINDOW_WIDTH / 2,
+                                             center_y=FLOOR_Y,
+                                             color=arcade.color.BLACK)
+        self.floor.alpha = 0
 
-```python
+        # add the floor to the obstacles list
+        self.obstacles.append(self.floor)
 ```
+If you run the game now, you'll see that you can complete the level, but it doesn't 
+take you to the next level. Let's address that now. 
 
+# 13.4 Check for Completion of the Current Level
+Add the following code to the bottom of `GameView.on_update`
 ```python
-```
 
-```python
+        # if the glider has gone off the right edge of the screen
+        if self.glider.center_x >= WINDOW_WIDTH:
+            self.handle_new_level()
 ```
+Then, add the `handle_new_level` method and one more to the bottom of the `GameView` class
 
 ```python
-```
 
-# 15 Startup and Game Over Views
+    # Update and set up the new level, or display the "you won" message
+    def handle_new_level(self):
+        if self.current_level == len(self.levels):
+            self.you_won()
+            return
+        self.current_level += 1
+        self.setup_level()
 
-```python
+    def you_won(self):
+        print("You won!")
 ```
+Finally, let's update the `print_score` method so that it prints the current level.
 
+Replace `print_score` with this:
 ```python
+    def print_score(self):
+        batch = Batch()
+        text = arcade.Text(f"Level: {self.current_level} Lives: {self.lives} Score: {self.score}",
+                           WINDOW_WIDTH - 10,
+                           40,
+                           batch=batch,
+                           color=arcade.color.BLACK,
+                           font_size=18,
+                           anchor_x='right')
+        batch.draw()
 ```
 
-```python
-```
 
 ```python
 ```
 
-```python
-```
+You can find the full file as it's supposed to look at the end of this step [here](13.py).
 
 ```python
 ```
@@ -979,8 +1042,7 @@ Now, update lose_life to this:
 ```python
 ```
 
-```python
-```
+# 14 Startup and Game Over Views
 
 ```python
 ```
@@ -988,8 +1050,6 @@ Now, update lose_life to this:
 ```python
 ```
 
-# 16 Scores
-
 ```python
 ```
 
@@ -1032,14 +1092,11 @@ Now, update lose_life to this:
 ```python
 ```
 
-```python
-```
+# 15 Spinners
 
 ```python
 ```
 
-# 17 Spinners
-
 ```python
 ```
 
@@ -1058,8 +1115,7 @@ Now, update lose_life to this:
 ```python
 ```
 
-```python
-```
+# 16 Where To Go From Here
 
 ```python
 ```
