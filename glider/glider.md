@@ -1012,49 +1012,148 @@ Replace `print_score` with this:
         batch.draw()
 ```
 
-
-```python
-```
-
 You can find the full file as it's supposed to look at the end of this step [here](13.py).
 
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
 # 14 Startup and Game Over Views
+The game almost looks like a real game, but it's missing a key part: Screens for start-up, 
+and for when the game is over - either because you lost all live or because you completed
+all levels. Lets work on them now. 
+
+# 14.1 Creating new Views
+The best way to create these screens is not to add the text to the `GameView`, but to 
+create new a new view for each of the screens.
+
+Create these three new views and add them near the bottom of your file, after the 
+`GameView` class but before `main`.
 
 ```python
-```
 
-```python
-```
+class StartupView(arcade.View):
+  def on_show_view(self):
+    """ This is run once when we switch to this view """
+    self.window.background_color = arcade.color.DARK_CHESTNUT
 
-```python
-```
+  def on_draw(self):
+    """ Draw this view """
+    self.clear()
+    batch = Batch()
+    text_1 = arcade.Text("Welcome to GliderJETS!",
+                         self.window.width / 2,
+                         self.window.height / 2,
+                         batch=batch,
+                         color=arcade.color.WHITE,
+                         font_size=50,
+                         anchor_x='center')
 
-```python
+    text_2 = arcade.Text("Press any Key to Start",
+                         self.window.width / 2,
+                         self.window.height / 2 - 75,
+                         batch=batch,
+                         color=arcade.color.WHITE,
+                         font_size=50,
+                         anchor_x='center')
+
+    batch.draw()
+
+  def on_key_press(self, symbol, modifiers):
+    """ If the user presses the mouse button, start the game. """
+    start_view = GameView()
+    start_view.setup()
+    start_view.setup_level()
+    self.window.show_view(start_view)
+
+
+class GameOverView(arcade.View):
+  def on_show_view(self):
+    """ This is run once when we switch to this view """
+    self.window.background_color = arcade.csscolor.DARK_SLATE_BLUE
+
+  def on_draw(self):
+    """ Draw this view """
+    self.clear()
+    batch = Batch()
+    text_1 = arcade.Text("Game Over",
+                         self.window.width / 2,
+                         self.window.height / 2,
+                         batch=batch,
+                         color=arcade.color.WHITE,
+                         font_size=50,
+                         anchor_x='center')
+
+    text_2 = arcade.Text("Press any Key to Restart",
+                         self.window.width / 2,
+                         self.window.height / 2 - 75,
+                         batch=batch,
+                         color=arcade.color.WHITE,
+                         font_size=50,
+                         anchor_x='center')
+
+    batch.draw()
+
+  def on_key_press(self, symbol, modifiers):
+    """ If the user presses the mouse button, start the game. """
+    start_view = GameView()
+    start_view.setup()
+    start_view.setup_level()
+    self.window.show_view(start_view)
+
+
+class YouWonView(arcade.View):
+  def on_show_view(self):
+    """ This is run once when we switch to this view """
+    self.window.background_color = arcade.csscolor.DARK_SLATE_BLUE
+
+  def on_draw(self):
+    """ Draw this view """
+    self.clear()
+    batch = Batch()
+    text_1 = arcade.Text("You Made It!",
+                         self.window.width / 2,
+                         self.window.height / 2,
+                         batch=batch,
+                         color=arcade.color.WHITE,
+                         font_size=50,
+                         anchor_x='center')
+
+    batch.draw()
+
+  def on_key_press(self, symbol, modifiers):
+    """ If the user presses the mouse button, start the game. """
+    start_view = GameView()
+    start_view.setup()
+    start_view.setup_level()
+    self.window.show_view(start_view)
 ```
+You can see that these views are pretty similar to each other, but they display different
+things. Later we'll see how to refactor this code to use only one view for all screens.
+
+For now we need to make sure we're showing these views at the correct time. 
+
+# 14.2 Showing the new views
+
+Change `main` to contain this code:
+```python
+def main():
+    """ Main function """
+    window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+    # show the start-up view instead of jumping straight to the game
+    start_view = StartupView()
+    window.show_view(start_view)
+    arcade.run()
+```
+Now, let's update the `GameView.game_over` method to the following:
+```python
+    def game_over(self):
+        game_over_view = GameOverView()
+        self.window.show_view(game_over_view)
+```
+And update `GameView.you_won` to:
+```python
+    def you_won(self):
+        you_won_view = YouWonView()
+        self.window.show_view(you_won_view)
+```
+You can find the full file as it's supposed to look at the end of this step [here](14.py).
 
 ```python
 ```
