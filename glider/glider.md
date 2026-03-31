@@ -845,7 +845,7 @@ to load the levels, and put this method at the bottom of the `GameView` class:
                 "glider_y": 500,
                 "vent_x": [300, 850],
                 "coin_xy": [(384, 300), (640, 350), (900, 500)],
-                "shelf_xywh": [(800, 400, WINDOW_WIDTH / 2, 4)],
+                "shelf_xywh": [(800, 400, 400, 4)],
                 "drawing_xywh": [(800, 230, 2, 340)],
             },
             {
@@ -853,7 +853,7 @@ to load the levels, and put this method at the bottom of the `GameView` class:
                 "vent_x": [650, 950],
                 "coin_xy": [(384, 300), (640, 350), (900, 500)],
                 "shelf_xywh": [],
-                "spinner_xywh": [(800, 300, WINDOW_WIDTH / 2, 8)]
+                "spinner_xywh": [(800, 300, 400, 8)]
             },
         ]
 ```
@@ -1019,7 +1019,7 @@ The game almost looks like a real game, but it's missing a key part: Screens for
 and for when the game is over - either because you lost all live or because you completed
 all levels. Lets work on them now. 
 
-# 14.1 Creating new Views
+## 14.1 Creating new Views
 The best way to create these screens is not to add the text to the `GameView`, but to 
 create new a new view for each of the screens.
 
@@ -1129,7 +1129,7 @@ things. Later we'll see how to refactor this code to use only one view for all s
 
 For now we need to make sure we're showing these views at the correct time. 
 
-# 14.2 Showing the new views
+## 14.2 Showing the new views
 
 Change `main` to contain this code:
 ```python
@@ -1155,43 +1155,65 @@ And update `GameView.you_won` to:
 ```
 You can find the full file as it's supposed to look at the end of this step [here](14.py).
 
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
 # 15 Spinners
+Obstacles don't have to be static. Like any good platformer game, we can have 
+moving obstacles that make levels a lot harder. Let's make a shelf that spins.
+
+## 15.1 Create a list of spinners
+Add the following lines to the bottom of `GameView.__init__`
+```python
+
+        # keep a list of all spinners so that we can spin them in on_update
+        self.spinners = []
+        # keep a variable that tracks how much the spinners are rotated
+        self.degrees = 0
+```
+Because we want every level to start the same way, we'll reset `self.degrees` at the 
+start of each level. Add this to the bottom of `GameView.setup_level`:
+
+```python
+
+        # reset to zero
+        self.degrees = 0
+```
+
+## 15.2 Spin the Spinners
+
+Now, add the following to the end of `GameView.on_update`, to spin each spinner another
+degree:
+```python
+
+        # spin the spinners
+        self.degrees += 1
+        for spinner in self.spinners:
+            spinner.angle = self.degrees
+```
+## 15.3 Add Spinners to our Levels
+Now, we need to add the spinners to our level when we create our levels. Remember, 
+that's done in `GameView.setup_level`. So, add the following to the bottom of 
+`GameView.setup_level`
+```python
+
+        # clear the spinner list
+        self.spinners = []
+        for x, y, w, h in data.get("spinner_xywh", []):
+            spinner = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
+            # add the spinner to the sprite list, so we can check for collisions
+            self.obstacles.append(spinner)
+            # add the spinner to the list of spinners so we can spin it
+            self.spinners.append(spinner)
+```
+We already had a line for spinners, in `GameView.load_levels`, so we don't need to 
+do anything there:
+```python
+                "spinner_xywh": [(800, 300, 400, 8)]
+```
+Now, when we run our game, level 4 has a spinner.
+
+You can find the full file as it's supposed to look at the end of this step [here](15.py).
+
+# 16 Refactoring our View
+
 
 ```python
 ```
@@ -1213,29 +1235,7 @@ You can find the full file as it's supposed to look at the end of this step [her
 
 ```python
 ```
-
-# 16 Where To Go From Here
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
-
-```python
-```
+#17 Where To Go From Here
 
 ```python
 ```

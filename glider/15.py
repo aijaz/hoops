@@ -106,6 +106,11 @@ class GameView(arcade.View):
         self.drawings = arcade.SpriteList()
         self.images = arcade.SpriteList()
 
+        # keep a list of all spinners so that we can spin them in on_update
+        self.spinners = []
+        # keep a variable that tracks how much the spinners are rotated
+        self.degrees = 0
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         self.glider_direction = 'right'
@@ -219,6 +224,11 @@ class GameView(arcade.View):
         if self.glider.center_x >= WINDOW_WIDTH:
             self.handle_new_level()
 
+        # spin the spinners
+        self.degrees += 1
+        for spinner in self.spinners:
+            spinner.angle = self.degrees
+
     def lose_life(self):
         if self.lives == 0:
             return
@@ -285,6 +295,18 @@ class GameView(arcade.View):
         for x, y, w, h in data.get("drawing_xywh", []):
             drawing = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
             self.drawings.append(drawing)   # append each drawing to the drawing sprite list
+
+        # reset to zero
+        self.degrees = 0
+
+        # clear the spinner list
+        self.spinners = []
+        for x, y, w, h in data.get("spinner_xywh", []):
+            spinner = arcade.SpriteSolidColor(w, h, x, y, arcade.color.BLACK)
+            # add the spinner to the sprite list, so we can check for collisions
+            self.obstacles.append(spinner)
+            # add the spinner to the list of spinners so we can spin it
+            self.spinners.append(spinner)
 
     def print_score(self):
         batch = Batch()
